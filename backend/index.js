@@ -1,34 +1,36 @@
-const express = require("express"),
-  path = require("path");
-
-const app = express();
-
-app.get("/api", (_request, response) => {
-  response.send({ hello: "World" });
-});
-
-app.use(express.static(path.join(path.resolve(), "dist")));
-
-app.listen(3000, () => {
-  console.log("Redo på http://localhost:3000/");
-});
-
-const dotenv = require("dotenv"),
-  { Client } = require("pg");
+const express = require("express");
+const path = require("path");
+const dotenv = require("dotenv");
+const { Client } = require("pg");
 
 dotenv.config();
 
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(express.static(path.join(path.resolve(), "dist")));
+
 const client = new Client({
-  connectionString: process.env.PGURI
-})
+  connectionString: process.env.PGURI,
+});
 
-client.connect()
+client
+  .connect()
+  .then(() => console.log("Ansluten till databasen"))
+  .catch((err) => console.error("DB-fel:", err));
 
-app.get('/api', async (_request, response) => {
-  const { rows } = await client.query(
-    'SELECT * FROM cities WHERE name = $1',
-    ['Stockholm']
-  )
+app.get("/api/players", async (_req, res) => {
+  try {
+    const { rows } = await client.query(
+      "SELECT name, goals FROM players ORDER BY goals DESC"
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error("DB Query error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
 
-  response.send(rows)
-})
+app.listen(port, () => {
+  console.log(`Server redo på http://localhost:3000/`);
+});

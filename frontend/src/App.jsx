@@ -1,41 +1,27 @@
 import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-    useEffect(() => {
-    fetch('/api')
-      .then((response) => response.json())
-      .then((result) => {
-        alert(`Hello ${result.hello}!`)
-      })
+  const [players, setPlayers] = useState([])
+
+  useEffect(() => {
+    fetch('/api/players')
+      .then(res => res.json())
+      .then(data => setPlayers(data))
+      .catch(err => console.error(err))
   }, [])
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div>
+      <h1>Fotbollsspelare och mål</h1>
+      <ul>
+        {players.map((p, i) => (
+          <li key={i}>
+            {p.name}: {p.goals} mål
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 
